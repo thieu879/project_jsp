@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Company Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<nav th:fragment="sideBar" class="sidebar">
+    <!-- Logo Section -->
+    <div class="logo">
+        <h2>My Company</h2>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="nav-menu">
+        <a th:href="@{/dashboard}"
+           class="nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'dashboard')} ? 'active' : ''">
+            <i class="fas fa-th-large"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a th:href="@{/candidate}"
+           class="nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'candidate')} ? 'active' : ''">
+            <i class="fas fa-user"></i>
+            <span>Candidate</span>
+        </a>
+
+        <a th:href="@{/technology}"
+           class="nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'technology')} ? 'active' : ''">
+            <i class="fas fa-laptop-code"></i>
+            <span>Technology</span>
+        </a>
+
+        <a th:href="@{/recruitment-position}"
+           class="nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'recruitment')} ? 'active' : ''">
+            <i class="fas fa-briefcase"></i>
+            <span>Recruitment Position</span>
+        </a>
+
+        <a th:href="@{/application}"
+           class="nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'application')} ? 'active' : ''">
+            <i class="fas fa-file-alt"></i>
+            <span>Application</span>
+        </a>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="profile-section">
+        <div class="profile-info">
+            <img th:src="@{/images/admin-avatar.jpg}"
+                 alt="Admin Avatar"
+                 class="profile-avatar"
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFMEUwRTAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5OTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDIwIDQgMTYuNjcgNCAxNkM0IDEzLjMzIDYuNjcgMTIgMTIgMTJDMTcuMzMgMTIgMjAgMTMuMzMgMjAgMTZDMjAgMTYuNjcgMTQuNjcgMjAgMTIgMjBaIiBmaWxsPSIjOTk5OTk5Ii8+Cjwvc3ZnPgo8L3N2Zz4K'">
+            <div class="profile-details">
+                <h4>Admin</h4>
+                <p>Admin@gmail.com</p>
+            </div>
+        </div>
+
+        <a th:href="@{/logout}" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Log out</span>
+        </a>
+    </div>
+</nav>
+</body>
+</html>

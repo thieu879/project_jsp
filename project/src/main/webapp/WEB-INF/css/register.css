@@ -1,0 +1,96 @@
+body{
+    margin: 0;
+    padding: 0;
+    overflow-y: hidden;
+}
+.bg-container {
+    background-image: url('https://thuthuatnhanh.com/wp-content/uploads/2023/06/hinh-nen-may-tinh-4k-don-gian-ma-dep-chill.jpg');
+    background-size: cover;
+    background-position: center;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.wrapper {
+    width: 100%;
+    max-width: 450px;
+    padding: 40px 30px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    color: #fff;
+    text-align: left;
+}
+
+.wrapper h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 24px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+input.form-control {
+    width: 95%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    color: #333;
+}
+
+input.form-control:focus {
+    outline: none;
+    box-shadow: 0 0 5px #1e90ff;
+}
+
+/* Thông báo lỗi */
+.text-danger {
+    color: #ff4d4d;
+    font-size: 12px;
+}
+
+/* Nút */
+.btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #1e90ff;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0066cc;
+}
+
+/* Link đăng nhập */
+.login-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.login-link a {
+    color: #fff;
+    text-decoration: underline;
+}

@@ -1,0 +1,279 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+}
+
+.title-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    background-color: #666;
+    border-radius: 3px;
+}
+
+.search-container {
+    position: relative;
+}
+
+.search-input {
+    padding: 10px 40px 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 300px;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #007bff;
+}
+
+.search-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+}
+
+.add-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #c82333;
+}
+
+.table-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 14px;
+}
+
+.table td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+
+.table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.stt-col {
+    width: 10%;
+}
+
+.name-col {
+    width: 70%;
+}
+
+.actions-col {
+    width: 20%;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.delete-btn {
+    color: #dc3545;
+    background-color: #fff5f5;
+    border: 1px solid #fecaca;
+}
+
+.delete-btn:hover {
+    background-color: #fee2e2;
+}
+
+.edit-btn {
+    color: #f59e0b;
+    background-color: #fffbeb;
+    border: 1px solid #fed7aa;
+}
+
+.edit-btn:hover {
+    background-color: #fef3c7;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    gap: 5px;
+}
+
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: #666;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.page-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.page-btn.active {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.page-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-btn.disabled:hover {
+    background-color: white;
+    border-color: #ddd;
+}
+
+/* Icons using CSS */
+.icon-delete::before {
+    content: "🗑";
+    font-size: 14px;
+}
+
+.icon-edit::before {
+    content: "✏";
+    font-size: 14px;
+}
+
+.icon-search::before {
+    content: "🔍";
+    font-size: 14px;
+}
+
+.icon-prev::before {
+    content: "‹";
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.icon-next::before {
+    content: "›";
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-top {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .search-input {
+        width: 100%;
+    }
+
+    .table {
+        font-size: 12px;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px 8px;
+    }
+
+    .actions {
+        gap: 5px;
+    }
+
+    .action-btn {
+        width: 28px;
+        height: 28px;
+    }
+}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Công nghệ</title>
+    <link rel="stylesheet" th:href="@{/css/technology-management.css}">
+    <link rel="stylesheet" th:href="@{/css/sideBar.css}">
+</head>
+
+<body>
+<div>
+    <div th:replace="sideBar :: sideBar"></div>
+</div>
+<div class="container">
+    <!-- Header Section -->
+    <div class="header">
+        <div class="header-top">
+            <div class="title">
+                <img th:src="@{../imgs/Group.png} " alt="Logo" class="logo">
+                Technology
+            </div>
+            <div class="search-container">
+                <form method="get" th:action="@{/admin/technology-management}">
+                    <input type="text" class="search-input" placeholder="Tìm kiếm công nghệ..."
+                           th:value="${searchKeyword}" name="search">
+                    <button class="search-btn icon-search" type="submit"></button>
+                </form>
+            </div>
+        </div>
+        <a class="add-btn" th:href="@{/admin/technology/add}">
+            Add Technology
+        </a>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-container">
+        <table class="table">
+            <thead>
+            <tr>
+                <th class="stt-col">#TT</th>
+                <th class="name-col">Name</th>
+                <th class="actions-col">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="tech, iterStat : ${technologies}">
+                <td th:text="${(currentPage * pageSize) + iterStat.count}">1</td>
+                <td th:text="${tech.name}">Front End</td>
+                <td>
+                    <div class="actions">
+                        <a th:href="@{'/admin/technology/delete/' + ${tech.id}}"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa công nghệ này?')"
+                           title="Xóa"><i class="fa-solid fa-trash" style="color: #FF0000"></i></a>
+                        <a th:href="@{'/admin/technology/edit/' + ${tech.id}}"
+                           title="Chỉnh sửa"><i class="fa-solid fa-pencil" style="color: #ffa703;"></i></a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <a class="page-btn icon-prev"
+           th:href="@{/admin/technology-management(page=${currentPage - 1}, size=${pageSize}, search=${searchKeyword})}"
+           th:classappend="${currentPage == 0} ? 'disabled'"
+           title="Previous"></a>
+
+        <a class="page-btn"
+           th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+           th:href="@{/admin/technology-management(page=${pageNum}, size=${pageSize}, search=${searchKeyword})}"
+           th:text="${pageNum + 1}"
+           th:classappend="${pageNum == currentPage} ? 'active'">1</a>
+
+        <a class="page-btn icon-next"
+           th:href="@{/admin/technology-management(page=${currentPage + 1}, size=${pageSize}, search=${searchKeyword})}"
+           th:classappend="${currentPage == totalPages - 1} ? 'disabled'"
+           title="Next"></a>
+    </div>
+</div>
+</body>
+<script src="https://kit.fontawesome.com/62fa62fdc5.js" crossorigin="anonymous"></script>
+</html>

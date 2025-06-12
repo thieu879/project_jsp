@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm Công nghệ</title>
+    <link rel="stylesheet" th:href="@{/css/technology-management.css}">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>Thêm Công nghệ Mới</h2>
+    </div>
+
+    <form th:action="@{/admin/technology/save}" th:object="${technology}" method="post">
+        <div class="form-group">
+            <label for="name">Tên công nghệ:</label>
+            <input type="text" id="name" th:field="*{name}" required>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <a th:href="@{/admin/technology-management}" class="btn btn-secondary">Hủy</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

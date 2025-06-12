@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký tài khoản</title>
+    <link rel="stylesheet" th:href="@{/css/register.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="bg-container">
+    <form class="wrapper" th:action="@{/register}" method="post" th:object="${authDto}">
+        <h2>Đăng ký tài khoản</h2>
+
+        <!-- Thông báo lỗi chung -->
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <div class="form-group">
+            <label><i class="fa fa-user"></i> Tên đăng nhập:</label>
+            <input type="text" th:field="*{username}" class="form-control"
+                   th:classappend="${#fields.hasErrors('username')} ? 'error' : ''"
+                   placeholder="Nhập tên đăng nhập">
+            <span th:errors="*{username}" class="text-danger"></span>
+            <span th:if="${usernameError}" th:text="${usernameError}" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fa fa-lock"></i> Mật khẩu:</label>
+            <input type="password" th:field="*{password}" class="form-control"
+                   th:classappend="${#fields.hasErrors('password')} ? 'error' : ''"
+                   placeholder="Nhập mật khẩu">
+            <span th:errors="*{password}" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fa fa-lock"></i> Nhập lại mật khẩu:</label>
+            <input type="password" name="repeatPassword" class="form-control"
+                   placeholder="Nhập lại mật khẩu">
+            <span th:if="${repeatPasswordError}" th:text="${repeatPasswordError}" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fa fa-envelope"></i> Email:</label>
+            <input type="email" th:field="*{email}" class="form-control"
+                   th:classappend="${#fields.hasErrors('email')} ? 'error' : ''"
+                   placeholder="Nhập email">
+            <span th:errors="*{email}" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fa fa-phone"></i> Số điện thoại:</label>
+            <input type="text" th:field="*{phone}" class="form-control"
+                   th:classappend="${#fields.hasErrors('phone')} ? 'error' : ''"
+                   placeholder="Nhập số điện thoại">
+            <span th:errors="*{phone}" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn">Đăng ký</button>
+        <p class="login-link">Đã có tài khoản? <a href="/login">Đăng nhập</a></p>
+    </form>
+</div>
+</body>
+</html>
