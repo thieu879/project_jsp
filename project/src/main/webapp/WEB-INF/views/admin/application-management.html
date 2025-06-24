@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Đơn Ứng Tuyển</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div class="flex flex-1 gap-5">
+    <div th:replace="sideBar :: sideBar"></div>
+    <div class="bg-gray-50 flex-1">
+        <div class="container mx-auto p-6">
+            <!-- Success/Error Messages -->
+            <div th:if="${successMessage}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <span th:text="${successMessage}"></span>
+            </div>
+            <div th:if="${errorMessage}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-file-alt text-2xl text-blue-600"></i>
+                        <h1 class="text-2xl font-semibold text-gray-800">Quản Lý Đơn Ứng Tuyển</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <!-- Status Filter -->
+                        <div class="relative">
+                            <form method="get" id="statusForm">
+                                <input type="hidden" name="page" value="1">
+                                <input type="hidden" name="search" th:value="${search}">
+                                <select name="status" onchange="document.getElementById('statusForm').submit()"
+                                        class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="all" th:selected="${status == null or status == 'all'}">Tất cả trạng thái</option>
+                                    <option value="PENDING" th:selected="${status == 'PENDING'}">Chờ xử lý</option>
+                                    <option value="HANDLING" th:selected="${status == 'HANDLING'}">Đang xử lý</option>
+                                    <option value="INTERVIEWING" th:selected="${status == 'INTERVIEWING'}">Phỏng vấn</option>
+                                    <option value="DONE" th:selected="${status == 'DONE'}">Hoàn thành</option>
+                                    <option value="REJECT" th:selected="${status == 'REJECT'}">Từ chối</option>
+                                    <option value="CANCEL" th:selected="${status == 'CANCEL'}">Đã hủy</option>
+                                </select>
+                                <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400 pointer-events-none"></i>
+                            </form>
+                        </div>
+                        <!-- Search -->
+                        <form method="get" class="relative">
+                            <input type="hidden" name="page" value="1">
+                            <input type="text" name="search" th:value="${search}" placeholder="Tìm kiếm theo tên ứng viên..."
+                                   class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <button type="submit" class="hidden"></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- Table -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ứng Viên</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vị Trí</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày Tạo</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng Thái</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao Tác</th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tr th:each="app, iterStat : ${applications}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                            th:text="${(currentPage - 1) * 10 + iterStat.count}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <!-- Click tên ứng viên để xem CV khi PENDING -->
+                            <button th:if="${app.progress.name() == 'PENDING'}"
+                                    onclick="openCvModal(this)"
+                                    class="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
+                                    th:text="${app.candidateName}"
+                                    th:data-id="${app.id}"
+                                    th:data-cv-url="${app.cvUrl}"
+                                    title="Xem CV">
+                            </button>
+
+                            <!-- Click tên ứng viên để cập nhật phỏng vấn khi INTERVIEWING -->
+                            <button th:if="${app.progress.name() == 'INTERVIEWING'}"
+                                    onclick="openUpdateInterviewModal(this)"
+                                    class="text-sm font-medium text-orange-600 hover:text-orange-800 cursor-pointer"
+                                    th:text="${app.candidateName}"
+                                    th:data-id="${app.id}"
+                                    th:data-interview-link="${app.interviewLink}"
+                                    th:data-interview-time="${app.interviewTime}"
+                                    title="Cập nhật lịch phỏng vấn">
+                            </button>
+
+                            <!-- Các trạng thái khác chỉ hiển thị tên -->
+                            <span th:if="${app.progress.name() != 'PENDING' and app.progress.name() != 'INTERVIEWING'}"
+                                  class="text-sm font-medium text-gray-900"
+                                  th:text="${app.candidateName}">
+    </span>
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <button th:if="${app.progress.name() == 'HANDLING'}"
+                                    onclick="openInterviewModal(this)"
+                                    class="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
+                                    th:text="${app.recruitmentName}"
+                                    th:data-id="${app.id}"
+                                    title="Lên lịch phỏng vấn">
+                            </button>
+
+                            <!-- Các trạng thái khác chỉ hiển thị tên -->
+                            <span th:if="${app.progress.name() != 'HANDLING'}"
+                                  class="text-sm font-medium text-gray-900"
+                                  th:text="${app.recruitmentName}">
+    </span>
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                            th:text="${app.createdAt}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span th:class="${'px-3 py-1 rounded-full text-xs font-medium ' +
+                                           (app.progress.name() == 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                            app.progress.name() == 'HANDLING' ? 'bg-blue-100 text-blue-800' :
+                                            app.progress.name() == 'INTERVIEWING' ? 'bg-purple-100 text-purple-800' :
+                                            app.progress.name() == 'DONE' ? 'bg-green-100 text-green-800' :
+                                            app.progress.name() == 'REJECT' ? 'bg-red-100 text-red-800' :
+                                            'bg-gray-100 text-gray-800')}"
+                                  th:text="${app.progress.status}">PENDING</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex items-center space-x-2">
+                                <!-- Approve Interview - chỉ hiện khi INTERVIEWING -->
+                                <button th:if="${app.progress.name() == 'INTERVIEWING'}"
+                                        class="text-purple-600 hover:text-purple-800"
+                                        onclick="openApproveModal(this)"
+                                        th:data-id="${app.id}"
+                                        title="Cập nhật kết quả phỏng vấn">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+
+                                <!-- View CV - luôn hiện -->
+                                <button onclick="openCvModal(this)"
+                                        th:data-id="${app.id}"
+                                        th:data-cv-url="${app.cvUrl}"
+                                        class="text-indigo-600 hover:text-indigo-800"
+                                        title="Xem CV">
+                                    <i class="fas fa-file-pdf"></i>
+                                </button>
+
+                                <!-- Destroy Application -->
+                                <button th:if="${app.progress.name() != 'CANCEL' and app.progress.name() != 'DONE'}"
+                                        class="text-red-600 hover:text-red-800"
+                                        onclick="openDestroyModal(this)"
+                                        th:data-id="${app.id}"
+                                        title="Hủy đơn ứng tuyển">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(applications)}">
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-4"></i>
+                            <p>Không có đơn ứng tuyển nào</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav aria-label="Page navigation" class="flex justify-center mt-8">
+                <div class="flex items-center space-x-1">
+                    <!-- Previous Button -->
+                    <a class="flex items-center justify-center w-10 h-10 text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition-colors duration-200"
+                       th:href="@{/admin/application-management(page=${currentPage - 1}, size=${pageSize}, search=${search}, gender=${gender}, experience=${experience}, status=${status}, technologys=${selectedTechnology})}"
+                       th:classappend="${currentPage <= 1} ? 'pointer-events-none opacity-50'"
+                       title="Previous">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+
+                    <!-- Page Numbers -->
+                    <a class="flex items-center justify-center w-10 h-10 text-sm font-medium border rounded-lg transition-colors duration-200"
+                       th:each="pageNum : ${#numbers.sequence(1, totalPages)}"
+                       th:href="@{/admin/application-management(page=${pageNum}, size=${pageSize}, search=${search}, gender=${gender}, experience=${experience}, status=${status}, technologys=${selectedTechnology})}"
+                       th:text="${pageNum}"
+                       th:classappend="${pageNum == currentPage} ? 'bg-red-600 text-white border-red-600 hover:bg-red-700' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-900'">
+                    </a>
+
+                    <!-- Next Button -->
+                    <a class="flex items-center justify-center w-10 h-10 text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition-colors duration-200"
+                       th:href="@{/admin/application-management(page=${currentPage + 1}, size=${pageSize}, search=${search}, gender=${gender}, experience=${experience}, status=${status}, technologys=${selectedTechnology})}"
+                       th:classappend="${currentPage >= totalPages} ? 'pointer-events-none opacity-50'"
+                       title="Next">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </nav>
+
+        </div>
+    </div>
+</div>
+
+<!-- Interview Modal - Lên lịch phỏng vấn -->
+<div id="interviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 id="interviewModalTitle" class="text-lg font-medium text-gray-900">Lên lịch phỏng vấn</h3>
+            <form id="interviewForm" th:action="@{/admin/applications/interview}" method="post">
+                <input type="hidden" id="interviewApplicationId" name="applicationId">
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Link phỏng vấn *</label>
+                    <input type="url" id="interviewLink" name="interviewLink" required
+                           placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                           class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Ví dụ: Google Meet, Zoom, Teams...</p>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Thời gian phỏng vấn *</label>
+                    <input type="datetime-local" id="interviewTime" name="interviewTime" required
+                           class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Chọn thời gian trong tương lai</p>
+                </div>
+                <div class="flex justify-end mt-6 space-x-3">
+                    <button type="button" onclick="closeInterviewModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                        Hủy
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-save mr-1"></i>
+                        Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Interview Modal -->
+<div id="updateInterviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg font-medium text-gray-900">Cập nhật lịch phỏng vấn</h3>
+            <form id="updateInterviewForm" method="post">
+                <input type="hidden" id="updateInterviewApplicationId">
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Link phỏng vấn *</label>
+                    <input type="url" id="updateInterviewLink" name="interviewLink" required
+                           placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                           class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Thời gian phỏng vấn *</label>
+                    <input type="datetime-local" id="updateInterviewTime" name="interviewTime" required
+                           class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end mt-6 space-x-3">
+                    <button type="button" onclick="closeUpdateInterviewModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Hủy
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700">
+                        <i class="fas fa-edit mr-1"></i>
+                        Cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- CV Modal -->
+<div id="cvModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-10 mx-auto p-5 border w-4/5 max-w-4xl shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Xem CV Ứng Viên</h3>
+                <button onclick="closeCvModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- CV Display Area -->
+            <div class="mb-4" style="height: 600px;">
+                <iframe id="cvFrame" src="" width="100%" height="100%"
+                        style="border: 1px solid #ddd; border-radius: 4px;">
+                </iframe>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeCvModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                    Đóng
+                </button>
+                <form method="post" th:action="@{/admin/applications/view-cv}" class="inline">
+                    <input type="hidden" id="cvApplicationId" name="applicationId">
+                    <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        Lưu & Chuyển sang HANDLING
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Approve Modal -->
+<div id="approveModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg font-medium text-gray-900">Cập nhật kết quả phỏng vấn</h3>
+            <form method="post" th:action="@{/admin/applications/approve}">
+                <input type="hidden" id="approveApplicationId" name="applicationId">
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Kết quả</label>
+                    <select name="interviewResult" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                        <option value="PASS">Đạt</option>
+                        <option value="FAIL">Không đạt</option>
+                    </select>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Ghi chú</label>
+                    <textarea name="interviewNote" rows="3"
+                              class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                </div>
+                <div class="flex justify-end mt-6 space-x-3">
+                    <button type="button" onclick="closeApproveModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md">Hủy</button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Destroy Modal -->
+<div id="destroyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg font-medium text-gray-900">Hủy đơn ứng tuyển</h3>
+            <form method="post" th:action="@{/admin/applications/destroy}">
+                <input type="hidden" id="destroyApplicationId" name="applicationId">
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700">Lý do hủy</label>
+                    <textarea name="destroyReason" rows="3" required
+                              class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                </div>
+                <div class="flex justify-end mt-6 space-x-3">
+                    <button type="button" onclick="closeDestroyModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md">Hủy</button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Modal functions
+
+    function openDestroyModal(button) {
+        const applicationId = button.getAttribute('data-id');
+        document.getElementById('destroyApplicationId').value = applicationId;
+        document.getElementById('destroyModal').classList.remove('hidden');
+        document.getElementById('destroyModal').classList.add('flex');
+    }
+
+    function closeDestroyModal() {
+        document.getElementById('destroyModal').classList.add('hidden');
+        document.getElementById('destroyModal').classList.remove('flex');
+    }
+
+    // Interview Modal - Lên lịch phỏng vấn
+    function openInterviewModal(button) {
+        const applicationId = button.getAttribute('data-id');
+        document.getElementById('interviewApplicationId').value = applicationId;
+
+        // Reset form
+        document.getElementById('interviewForm').reset();
+        document.getElementById('interviewApplicationId').value = applicationId;
+
+        document.getElementById('interviewModal').classList.remove('hidden');
+        document.getElementById('interviewModal').classList.add('flex');
+    }
+
+    function closeInterviewModal() {
+        document.getElementById('interviewModal').classList.add('hidden');
+        document.getElementById('interviewModal').classList.remove('flex');
+        document.getElementById('interviewForm').reset();
+    }
+
+    // Update Interview Modal - Cập nhật phỏng vấn
+    function openUpdateInterviewModal(button) {
+        const applicationId = button.getAttribute('data-id');
+        const interviewLink = button.getAttribute('data-interview-link');
+        const interviewTime = button.getAttribute('data-interview-time');
+
+        // Set application ID
+        document.getElementById('updateInterviewApplicationId').value = applicationId;
+
+        // Set current values
+        document.getElementById('updateInterviewLink').value = interviewLink || '';
+
+        // Format datetime for input
+        if (interviewTime) {
+            try {
+                const date = new Date(interviewTime);
+                const formattedTime = date.toISOString().slice(0, 16);
+                document.getElementById('updateInterviewTime').value = formattedTime;
+            } catch (e) {
+                console.error('Error formatting date:', e);
+            }
+        }
+
+        // Set form action dynamically
+        document.getElementById('updateInterviewForm').action = `/admin/applications/updateInterview/${applicationId}`;
+
+        // Show modal
+        document.getElementById('updateInterviewModal').classList.remove('hidden');
+        document.getElementById('updateInterviewModal').classList.add('flex');
+    }
+
+    function closeUpdateInterviewModal() {
+        document.getElementById('updateInterviewModal').classList.add('hidden');
+        document.getElementById('updateInterviewModal').classList.remove('flex');
+        document.getElementById('updateInterviewForm').reset();
+    }
+
+
+
+    function openApproveModal(button) {
+        const applicationId = button.getAttribute('data-id');
+        document.getElementById('approveApplicationId').value = applicationId;
+        document.getElementById('approveModal').classList.remove('hidden');
+        document.getElementById('approveModal').classList.add('flex');
+    }
+
+    function closeApproveModal() {
+        document.getElementById('approveModal').classList.add('hidden');
+        document.getElementById('approveModal').classList.remove('flex');
+    }
+    // CV Modal functions
+    function openCvModal(button) {
+        const applicationId = button.getAttribute('data-id');
+        const cvUrl = button.getAttribute('data-cv-url');
+
+        document.getElementById('cvApplicationId').value = applicationId;
+        document.getElementById('cvFrame').src = cvUrl;
+        document.getElementById('cvModal').classList.remove('hidden');
+        document.getElementById('cvModal').classList.add('flex');
+    }
+
+    function closeCvModal() {
+        document.getElementById('cvModal').classList.add('hidden');
+        document.getElementById('cvModal').classList.remove('flex');
+        document.getElementById('cvFrame').src = '';
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #374151;
+            background-color: white;
+            transition: all 0.2s;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .page-btn:hover:not(.disabled) {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .page-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .icon-prev::before {
+            content: "‹";
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .icon-next::before {
+            content: "›";
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="flex gap-[20px]">
+    <div th:replace="sideBar :: sideBar"></div>
+    <div class="container">
+        <!-- Header -->
+        <div class="flex items-center mb-6">
+            <i class="fas fa-user-graduate text-2xl mr-3"></i>
+            <h1 class="text-2xl font-bold text-gray-800">Candidate</h1>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <form method="get" th:action="@{/admin/candidate-management}">
+                <div class="flex flex-wrap gap-4 items-center">
+                    <!-- Technology Filter -->
+                    <div class="relative">
+                        <select name="technologys" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">Technology</option>
+                            <option th:each="technology : ${technologys}"
+                                    th:value="${technology.id}"
+                                    th:selected="${selectedTechnology != null and selectedTechnology == technology.id.toString()}"
+                                    th:text="${technology.name}">Technology Name</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400 pointer-events-none"></i>
+                    </div>
+
+                    <!-- Gender Filter -->
+                    <div class="relative">
+                        <select name="gender" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">Gender</option>
+                            <option value="true" th:selected="${gender == 'true'}">Male</option>
+                            <option value="false" th:selected="${gender == 'false'}">Female</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400 pointer-events-none"></i>
+                    </div>
+
+                    <!-- Experience Filter -->
+                    <div class="relative">
+                        <select name="experience" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">Experience</option>
+                            <option value="0-1" th:selected="${experience == '0-1'}">0-1 years</option>
+                            <option value="2-3" th:selected="${experience == '2-3'}">2-3 years</option>
+                            <option value="4-5" th:selected="${experience == '4-5'}">4-5 years</option>
+                            <option value="5+" th:selected="${experience == '5+'}">5+ years</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400 pointer-events-none"></i>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="relative">
+                        <select name="status" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">Status</option>
+                            <option value="true" th:selected="${status == 'true'}">Active</option>
+                            <option value="false" th:selected="${status == 'false'}">Deactivate</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400 pointer-events-none"></i>
+                    </div>
+
+                    <!-- Search Box -->
+                    <div class="relative flex-1 max-w-md">
+                        <input type="text" name="search" th:value="${search}" placeholder="Search here..."
+                               class="w-full border border-gray-300 rounded-md px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                    </div>
+
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        Lọc
+                    </button>
+                    <a th:href="@{/admin/candidate-management}" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Info -->
+        <div class="mb-4">
+            <p class="text-gray-600">
+                Hiển thị <span th:text="${candidates.size()}">0</span> trên tổng số
+                <span th:text="${totalElements}">0</span> ứng viên
+            </p>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Technology</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                <tr th:each="candidate, iterStat : ${candidates}" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        th:text="${(currentPage - 1) * pageSize + iterStat.index + 1}">1</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${candidate.name}">Name</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${candidate.email}">Email</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span th:if="${candidate.technologies != null and !candidate.technologies.isEmpty()}"
+                              th:each="tech : ${candidate.technologies}"
+                              class="inline-flex px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full mr-1"
+                              th:text="${tech.name}">Technology</span>
+                        <span th:if="${candidate.technologies == null or candidate.technologies.isEmpty()}"
+                              class="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">N/A</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${candidate.phone}">Phone</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${candidate.experience}">Experience</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        th:text="${candidate.gender ? 'Male' : 'Female'}">Gender</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span th:if="${candidate.status}"
+                              class="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                            <i class="fas fa-circle text-green-500 mr-1 text-xs"></i>Active
+                        </span>
+                        <span th:unless="${candidate.status}"
+                              class="inline-flex px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                            <i class="fas fa-circle text-red-500 mr-1 text-xs"></i>Deactivate
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button th:onclick="'toggleStatus(' + ${candidate.id} + ')'"
+                                th:class="${candidate.status ? 'text-green-600 hover:text-red-900' : 'text-red-600 hover:text-blue-900'}"
+                                th:title="${candidate.status ? 'Khóa tài khoản' : 'Kích hoạt tài khoản'}">
+                            <i th:class="${candidate.status ? 'fas fa-lock-open' : 'fas fa-lock'}"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr th:if="${candidates == null or candidates.isEmpty()}">
+                    <td colspan="9" class="px-6 py-4 text-center text-gray-500">
+                        Không tìm thấy ứng viên nào
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <a class="page-btn icon-prev"
+               th:href="@{/admin/candidate-management(page=${currentPage - 1}, size=${pageSize}, search=${search}, gender=${gender}, experience=${experience}, status=${status}, technologys=${selectedTechnology})}"
+               th:classappend="${currentPage <= 1} ? 'disabled'"
+               title="Previous"></a>
+
+            <a class="page-btn"
+               th:each="pageNum : ${#numbers.sequence(1, totalPages)}"
+               th:href="@{/admin/candidate-management(page=${pageNum}, size=${pageSize}, search=${search}, gender=${gender}, experience=${experience}, status=${status}, technologys=${selectedTechnology})}"
+               th:text="${pageNum}"
+               th:classappend="${pageNum == currentPage} ? 'active'">1</a>
+
+            <a class="page-btn icon-next"
+               th:href="@{/admin/candidate-management(page=${currentPage + 1}, size=${pageSize}, search=${search}, gender=${gender}, experience=${experience}, status=${status}, technologys=${selectedTechnology})}"
+               th:classappend="${currentPage >= totalPages} ? 'disabled'"
+               title="Next"></a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleStatus(candidateId) {
+        if (!confirm('Bạn có chắc chắn muốn thay đổi trạng thái tài khoản này?')) {
+            return;
+        }
+
+        fetch(`/admin/candidate/toggle-status/${candidateId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi thực hiện thao tác');
+            });
+    }
+</script>
+</body>
+</html>

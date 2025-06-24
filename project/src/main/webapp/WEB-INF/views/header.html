@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <header th:fragment="header" class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <a href="/home" class="flex items-center">
+                    <span class="text-xl font-bold text-gray-900">Intern</span>
+                    <span class="text-xl font-bold text-red-600 ml-1">SHIP</span>
+                </a>
+
+                <!-- Hiển thị dropdown nếu đã đăng nhập -->
+                <div th:if="${isLoggedIn}" class="relative inline-block text-left">
+                    <!-- Dropdown button -->
+                    <button
+                            id="dropdownButton"
+                            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Hello, <span class="text-red-500 font-semibold" th:text="${candidate?.name ?: currentUser.username}">User</span>
+                        <svg class="w-5 h-5 ml-2 -mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown menu -->
+                    <div
+                            id="dropdownMenu"
+                            class="hidden absolute right-0 w-56 mt-2 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                    >
+                        <div class="py-1">
+                            <a
+                                    th:href="@{/candidate/profile/{id}(id=${candidate?.id})}"
+                                    th:if="${candidate != null}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150"
+                            >
+                                Information
+                            </a>
+                            <a
+                                    href="#"
+                                    th:if="${candidate == null}"
+                                    class="block px-4 py-2 text-sm text-gray-400 cursor-not-allowed"
+                            >
+                                Information
+                            </a>
+                            <a
+                                    href="#"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150"
+                            >
+                                My Application
+                            </a>
+                            <a
+                                    href="/logout"
+                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
+                            >
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hiển thị nút đăng nhập/đăng ký nếu chưa đăng nhập -->
+                <div th:unless="${isLoggedIn}" class="flex items-center space-x-4">
+                    <a href="/register" class="text-gray-600 hover:text-gray-900">Sign In</a>
+                    <span class="text-gray-400">/</span>
+                    <a href="/login" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </header>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownButton = document.getElementById('dropdownButton');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        if (dropdownButton && dropdownMenu) {
+            dropdownButton.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('hidden');
+            });
+
+            // Đóng dropdown khi click bên ngoài
+            document.addEventListener('click', function(event) {
+                if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
+</html>

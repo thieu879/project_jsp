@@ -56,5 +56,14 @@ public class TechnologyServiceImpl implements TechnologyService {
     public long countByName(String name) {
         return ((TechnologyRepositoryImpl) technologyRepository).countByName(name);
     }
-}
 
+    @Override
+    public boolean existsByName(String name) {
+        return technologyRepository.existsByName(name);
+    }
+
+    @Override
+    public boolean existsByNameAndIdNot(String name, Long id) {
+        return technologyRepository.existsByNameAndIdNot(name, id);
+    }
+}

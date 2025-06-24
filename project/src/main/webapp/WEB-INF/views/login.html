@@ -2,37 +2,51 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng nhập tài khoản</title>
-    <link rel="stylesheet" th:href="@{/css/register.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>My Company - Đăng nhập</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
-<div class="bg-container">
+<div>
     <form class="wrapper" th:action="@{/login}" method="post" th:object="${loginDto}">
-        <h2>Đăng nhập tài khoản</h2>
+        <div class="logo">
+            <h1>My <span class="company">Company</span></h1>
+        </div>
+
+        <p class="subtitle">Please sign in</p>
 
         <!-- Thông báo lỗi -->
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
         <div class="form-group">
-            <label><i class="fa fa-user"></i> Tên đăng nhập:</label>
             <input type="text" th:field="*{username}" class="form-control"
                    th:classappend="${#fields.hasErrors('username')} ? 'error' : ''"
-                   placeholder="Nhập tên đăng nhập">
+                   id="username" name="username" placeholder="Please enter your username ...">
             <span th:errors="*{username}" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <label><i class="fa fa-lock"></i> Mật khẩu:</label>
             <input type="password" th:field="*{password}" class="form-control"
                    th:classappend="${#fields.hasErrors('password')} ? 'error' : ''"
-                   placeholder="Nhập mật khẩu">
+                   id="password" name="password" placeholder="Please enter your password ...">
             <span th:errors="*{password}" class="text-danger"></span>
         </div>
 
-        <button type="submit" class="btn">Đăng nhập</button>
-        <p class="login-link">Chưa có tài khoản? <a href="/register">Đăng ký</a></p>
+        <div class="form-options">
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember" value="true">
+                <label for="remember">Remember me (30 days)</label>
+            </div>
+            <div class="login-link">
+                Don't have an account, <a th:href="@{/register}">click here !</a>
+            </div>
+        </div>
+
+        <button type="submit" class="btn">Sign In</button>
+
+        <div class="footer">
+            © 2025 - Rikkel Education
+        </div>
     </form>
 </div>
 </body>

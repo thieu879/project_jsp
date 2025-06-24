@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <title>Thêm Công nghệ</title>
     <link rel="stylesheet" th:href="@{/css/technology-management.css}">
+    <style>
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+        .form-input.error {
+            border-color: #dc3545;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -11,10 +22,12 @@
         <h2>Thêm Công nghệ Mới</h2>
     </div>
 
-    <form th:action="@{/admin/technology/save}" th:object="${technology}" method="post">
+    <form th:action="@{/admin/technology/save}" th:object="${technologyDto}" method="post">
         <div class="form-group">
             <label for="name">Tên công nghệ:</label>
-            <input type="text" id="name" th:field="*{name}" required>
+            <input type="text" id="name" th:field="*{name}"
+                   th:classappend="${#fields.hasErrors('name')} ? 'error'" required>
+            <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error-message"></div>
         </div>
 
         <div class="form-actions">

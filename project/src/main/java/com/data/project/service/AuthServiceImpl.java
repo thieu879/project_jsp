@@ -43,5 +43,22 @@ public class AuthServiceImpl implements AuthService {
     public Auth getAuthByUsername(String username) {
         return authRepository.getAuthByUsername(username);
     }
+    @Override
+    public Auth getAuthByEmail(String email) {
+        return authRepository.getAuthByEmail(email);
+    }
 
+    @Override
+    public Auth findById(Long id) {
+        return authRepository.findById(id);
+    }
+    @Override
+    public boolean checkPassword(String rawPassword, String encodedPassword) {
+        return authRepository.checkPassword(rawPassword, encodedPassword);
+    }
+
+    @Override
+    public void changePassword(String email, String newPassword) {
+        authRepository.changePassword(email, newPassword);
+    }
 }

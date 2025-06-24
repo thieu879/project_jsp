@@ -2,8 +2,11 @@ package com.data.project.controller;
 
 import com.data.project.dto.AuthDto;
 import com.data.project.dto.LoginDto;
+import com.data.project.dto.admin.CandidateDTO;
 import com.data.project.entity.Auth;
+import com.data.project.entity.Candidate;
 import com.data.project.service.AuthService;
+import com.data.project.service.admin.CandidateService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,15 +20,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 public class AuthController {
     private final ModelMapper modelMapper;
     private final AuthService authService;
+    private final CandidateService candidateService;
 
-    public AuthController(AuthService authService, ModelMapper modelMapper) {
-        this.authService = authService;
-        this.modelMapper = modelMapper;
+    public AuthController(AuthService authService, ModelMapper modelMapper, CandidateService candidateService) {
+            this.authService = authService;
+            this.modelMapper = modelMapper;
+            this.candidateService = candidateService;
     }
 
     @GetMapping("/register")
@@ -36,30 +42,50 @@ public class AuthController {
 
     @PostMapping("/register")
     public String register(@Valid AuthDto authDto, BindingResult result,
+                           CandidateDTO candidateDto,
                            @RequestParam("repeatPassword") String repeatPassword, Model model) {
 
         if (result.hasErrors()) {
             return "/register";
         }
 
-        // Kiểm tra mật khẩu nhập lại
         if (!authDto.getPassword().equals(repeatPassword)) {
             model.addAttribute("repeatPasswordError", "Mật khẩu nhập lại không khớp");
             return "/register";
         }
 
         try {
-            // Kiểm tra username đã tồn tại
             if (authService.getAuthByUsername(authDto.getUsername()) != null) {
                 model.addAttribute("usernameError", "Tên đăng nhập đã tồn tại");
+                return "/register";
+            }
+            Auth existingAuth = authService.getAuthByEmail(candidateDto.getEmail());
+            if (existingAuth != null) {
+                model.addAttribute("emailError", "Email đã được sử dụng trong hệ thống");
+                return "/register";
+            }
+            if (candidateService.existsByEmail(authDto.getEmail())) {
+                model.addAttribute("emailError", "Email đã được sử dụng trong hệ thống");
                 return "/register";
             }
 
             Auth auth = modelMapper.map(authDto, Auth.class);
             auth.setRole(false);
             auth.setStatus(true);
-
             authService.register(auth);
+
+            Candidate candidate = modelMapper.map(candidateDto, Candidate.class);
+            candidate.setStatus(true);
+            candidate.setEmail(authDto.getEmail());
+            candidate.setPhone(authDto.getPhone());
+            candidate.setExperience(0);
+            candidate.setGender(true);
+            candidate.setName(authDto.getUsername());
+            candidate.setDescription(null);
+            candidate.setDob(null);
+            candidate.setTechnologies(null);
+            candidateService.save(candidate);
+
             model.addAttribute("success", "Đăng ký thành công!");
             return "redirect:/login";
         } catch (Exception e) {
@@ -69,13 +95,40 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String login(Model model) {
+    public String login(Model model, HttpServletRequest request) {
+        // Kiểm tra cookie để tự động đăng nhập
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("authId".equals(cookie.getName())) {
+                    String userId = cookie.getValue();
+                    try {
+                        Auth auth = authService.findById(Long.valueOf(userId));
+                        if (auth != null && auth.isStatus()) {
+                            // Tạo session mới
+                            HttpSession session = request.getSession(true);
+                            if (auth.isRole()) {
+                                session.setAttribute("admin", auth);
+                                return "redirect:/admin/technology-management";
+                            } else {
+                                session.setAttribute("user", auth);
+                                return "redirect:/home";
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Cookie không hợp lệ, bỏ qua
+                    }
+                }
+            }
+        }
+
         model.addAttribute("loginDto", new LoginDto());
         return "/login";
     }
 
     @PostMapping("/login")
     public String login(@Valid LoginDto loginDto, BindingResult result,
+                        @RequestParam(value = "remember", required = false) boolean remember,
                         Model model, HttpServletRequest request, HttpServletResponse response) {
 
         if (result.hasErrors()) {
@@ -86,22 +139,28 @@ public class AuthController {
             authService.login(loginDto.getUsername(), loginDto.getPassword());
             Auth loggedInAuth = authService.getAuthByUsername(loginDto.getUsername());
 
-            // Tạo cookie để lưu thông tin đăng nhập
+            // Tạo cookie với thời gian sống khác nhau
             Cookie cookie = new Cookie("authId", String.valueOf(loggedInAuth.getId()));
-            cookie.setMaxAge(3600); // 1 giờ
-            cookie.setHttpOnly(true);
-            response.addCookie(cookie);
 
-            // Phân quyền dựa trên role
-            if (loggedInAuth.isRole()) {
-                HttpSession session = request.getSession();
-                session.setAttribute("admin", loggedInAuth);
-                return "redirect:/admin/technology-management";
+            if (remember) {
+                cookie.setMaxAge(30 * 24 * 3600); // 30 ngày nếu chọn "Remember me"
+            } else {
+                cookie.setMaxAge(7 * 24 * 3600); // 7 ngày mặc định
             }
 
-            HttpSession session = request.getSession();
-            session.setAttribute("user", loggedInAuth);
-            return "redirect:/home";
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+
+            // Tạo session
+            HttpSession session = request.getSession(true);
+            if (loggedInAuth.isRole()) {
+                session.setAttribute("admin", loggedInAuth);
+                return "redirect:/admin/technology-management";
+            } else {
+                session.setAttribute("user", loggedInAuth);
+                return "redirect:/home";
+            }
         } catch (Exception e) {
             model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng");
             return "/login";
@@ -110,11 +169,20 @@ public class AuthController {
 
     @GetMapping("/logout")
     public String logout(HttpServletRequest request, HttpServletResponse response) {
-        // Xóa cookie
-        Cookie cookie = new Cookie("authId", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+        // Xóa tất cả cookie liên quan
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("authId".equals(cookie.getName())) {
+                    Cookie deleteCookie = new Cookie("authId", null);
+                    deleteCookie.setMaxAge(0);
+                    deleteCookie.setPath("/");
+                    deleteCookie.setHttpOnly(true);
+                    response.addCookie(deleteCookie);
+                    break;
+                }
+            }
+        }
 
         // Hủy session
         HttpSession session = request.getSession(false);
@@ -125,23 +193,5 @@ public class AuthController {
         return "redirect:/login";
     }
 
-    @GetMapping("/home")
-    public String home(Model model, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            Auth admin = (Auth) session.getAttribute("admin");
-            Auth user = (Auth) session.getAttribute("user");
 
-            if (admin != null) {
-                model.addAttribute("auth", admin);
-            } else if (user != null) {
-                model.addAttribute("auth", user);
-            } else {
-                return "redirect:/login";
-            }
-        } else {
-            return "redirect:/login";
-        }
-        return "/home";
-    }
 }

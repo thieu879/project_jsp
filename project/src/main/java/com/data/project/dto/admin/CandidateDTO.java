@@ -1,10 +1,12 @@
 package com.data.project.dto.admin;
 
+import com.data.project.entity.Technology;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 public class CandidateDTO {
     private Long id;
@@ -36,6 +38,15 @@ public class CandidateDTO {
     @Past(message = "Ngày sinh phải là ngày trong quá khứ")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dob;
+    private Set<Technology> technologies;
+
+    public Set<Technology> getTechnologies() {
+        return technologies;
+    }
+
+    public void setTechnologies(Set<Technology> technologies) {
+        this.technologies = technologies;
+    }
 
     public CandidateDTO() {}
 

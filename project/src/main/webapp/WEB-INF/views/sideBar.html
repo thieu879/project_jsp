@@ -5,67 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Company Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for active state */
+        .nav-item.active {
+            border-right: 3px solid #1976d2;
+        }
+    </style>
 </head>
-<body>
-<nav th:fragment="sideBar" class="sidebar">
+<body class="font-sans bg-gray-100">
+<nav th:fragment="sideBar" class="left-0 top-0 w-64 h-screen bg-white shadow-lg flex flex-col">
     <!-- Logo Section -->
-    <div class="logo">
-        <h2>My Company</h2>
+    <div class="p-5 border-b border-gray-200">
+        <div class="flex items-center">
+            <img th:src="@{../imgs/BlackandWhiteCollection15.png}"
+                 alt="Logo"
+                 class="w-10 h-10 mr-3">
+            <h2 class="text-red-700 text-lg font-semibold">My Company</h2>
+        </div>
     </div>
 
     <!-- Navigation Menu -->
-    <div class="nav-menu">
-        <a th:href="@{/dashboard}"
-           class="nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'dashboard')} ? 'active' : ''">
-            <i class="fas fa-th-large"></i>
-            <span>Dashboard</span>
-        </a>
+    <div class="flex-1 py-5">
+<!--        <a th:href="@{/dashboard}"-->
+<!--           class="nav-item flex items-center px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all duration-300 no-underline w-full"-->
+<!--           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'dashboard')} ? 'active bg-blue-50 text-blue-600' : ''">-->
+<!--            <img th:src="@{../imgs/Vector.png}"-->
+<!--                 alt="Dashboard Icon"-->
+<!--                 class="w-5 mr-3">-->
+<!--            <span>Dashboard</span>-->
+<!--        </a>-->
 
-        <a th:href="@{/candidate}"
-           class="nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'candidate')} ? 'active' : ''">
-            <i class="fas fa-user"></i>
+        <a th:href="@{/admin/candidate-management}"
+           class="nav-item flex items-center px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all duration-300 no-underline w-full"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'candidate')} ? 'active bg-blue-50 text-blue-600' : ''">
+            <img th:src="@{../imgs/Vector(1).png}"
+                 alt="Candidate Icon"
+                 class="w-5 mr-3">
             <span>Candidate</span>
         </a>
 
-        <a th:href="@{/technology}"
-           class="nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'technology')} ? 'active' : ''">
-            <i class="fas fa-laptop-code"></i>
+        <a th:href="@{/admin/technology-management}"
+           class="nav-item flex items-center px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all duration-300 no-underline w-full"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'technology')} ? 'active bg-blue-50 text-blue-600' : ''">
+            <img th:src="@{../imgs/Group.png}"
+                 alt="Technology Icon"
+                 class="w-5 mr-3">
             <span>Technology</span>
         </a>
 
-        <a th:href="@{/recruitment-position}"
-           class="nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'recruitment')} ? 'active' : ''">
-            <i class="fas fa-briefcase"></i>
+        <a th:href="@{/admin/recruitment-position-management}"
+           class="nav-item flex items-center px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all duration-300 no-underline w-full"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'recruitment')} ? 'active bg-blue-50 text-blue-600' : ''">
+            <img th:src="@{../imgs/Vector(2).png}"
+                 alt="Recruitment Icon"
+                 class="w-5 mr-3">
             <span>Recruitment Position</span>
         </a>
 
-        <a th:href="@{/application}"
-           class="nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'application')} ? 'active' : ''">
-            <i class="fas fa-file-alt"></i>
+        <a th:href="@{/admin/application-management}"
+           class="nav-item flex items-center px-5 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all duration-300 no-underline w-full"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, 'application')} ? 'active bg-blue-50 text-blue-600' : ''">
+            <img th:src="@{../imgs/Vector(3).png}"
+                 alt="Application Icon"
+                 class="w-5 mr-3">
             <span>Application</span>
         </a>
     </div>
 
     <!-- Profile Section -->
-    <div class="profile-section">
-        <div class="profile-info">
+    <div class="border-t border-gray-200 p-5">
+        <div class="flex items-center mb-4">
             <img th:src="@{/images/admin-avatar.jpg}"
                  alt="Admin Avatar"
-                 class="profile-avatar"
+                 class="w-10 h-10 rounded-full mr-3"
                  onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNFMEUwRTAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5OTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDIwIDQgMTYuNjcgNCAxNkM0IDEzLjMzIDYuNjcgMTIgMTIgMTJDMTcuMzMgMTIgMjAgMTMuMzMgMjAgMTZDMjAgMTYuNjcgMTQuNjcgMjAgMTIgMjBaIiBmaWxsPSIjOTk5OTk5Ii8+Cjwvc3ZnPgo8L3N2Zz4K'">
-            <div class="profile-details">
-                <h4>Admin</h4>
-                <p>Admin@gmail.com</p>
+            <div>
+                <h4 class="text-sm font-semibold text-gray-800 mb-1">Admin</h4>
+                <p class="text-xs text-gray-600">Admin@gmail.com</p>
             </div>
         </div>
 
-        <a th:href="@{/logout}" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i>
+        <a th:href="@{/logout}"
+           class="flex items-center py-2 text-gray-600 hover:text-red-700 transition-colors duration-300 no-underline text-sm">
+            <i class="fas fa-sign-out-alt mr-2"></i>
             <span>Log out</span>
         </a>
     </div>

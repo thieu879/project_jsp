@@ -11,4 +11,8 @@ public interface AuthRepository {
     void updateStatus(Long id, boolean status);
     List<Auth> getAllAuths(int page, int size);
     Auth getAuthByUsername(String username);
+    Auth getAuthByEmail(String email);
+    Auth findById(Long id);
+    boolean checkPassword(String rawPassword, String encodedPassword);
+    void changePassword(String email, String newPassword);
 }

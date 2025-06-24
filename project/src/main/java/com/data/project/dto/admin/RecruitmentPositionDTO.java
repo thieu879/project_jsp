@@ -1,11 +1,14 @@
 package com.data.project.dto.admin;
 
+import com.data.project.entity.Technology;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RecruitmentPositionDTO {
     private Long id;
@@ -29,20 +32,26 @@ public class RecruitmentPositionDTO {
     @Max(value = 20, message = "Kinh nghiệm tối thiểu không được vượt quá 20 năm")
     private int minExperience;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate createdDate;
 
     @NotNull(message = "Ngày hết hạn không được để trống")
     @Future(message = "Ngày hết hạn phải là ngày trong tương lai")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expiredDate;
 
-    public RecruitmentPositionDTO() {
-        this.createdDate = LocalDate.now();
-    }
+    private boolean status;
+    private Set<Technology> technologies;
 
-    public RecruitmentPositionDTO(String name, String description, Double minSalary,
-                                  Double maxSalary, int minExperience, LocalDate expiredDate) {
+    // Thêm trường này để binding với checkbox form
+    private Set<Long> technologyIds;
+
+    public RecruitmentPositionDTO() {}
+
+    public RecruitmentPositionDTO(String name, String description, Double minSalary, Double maxSalary,
+                                  int minExperience, LocalDate expiredDate) {
         this.name = name;
         this.description = description;
         this.minSalary = minSalary;
@@ -50,6 +59,7 @@ public class RecruitmentPositionDTO {
         this.minExperience = minExperience;
         this.createdDate = LocalDate.now();
         this.expiredDate = expiredDate;
+        this.status = true;
     }
 
     @AssertTrue(message = "Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu")
@@ -60,6 +70,7 @@ public class RecruitmentPositionDTO {
         return maxSalary >= minSalary;
     }
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -83,4 +94,31 @@ public class RecruitmentPositionDTO {
 
     public LocalDate getExpiredDate() { return expiredDate; }
     public void setExpiredDate(LocalDate expiredDate) { this.expiredDate = expiredDate; }
+
+    public boolean isStatus() { return status; }
+    public void setStatus(boolean status) { this.status = status; }
+
+    public Set<Technology> getTechnologies() {
+        return technologies;
+    }
+
+    // Sửa setter để đồng bộ với technologyIds
+    public void setTechnologies(Set<Technology> technologies) {
+        this.technologies = technologies;
+        // Đồng bộ technologyIds khi set technologies
+        if (technologies != null) {
+            this.technologyIds = technologies.stream()
+                    .map(Technology::getId)
+                    .collect(Collectors.toSet());
+        }
+    }
+
+    // Getter và Setter cho technologyIds
+    public Set<Long> getTechnologyIds() {
+        return technologyIds;
+    }
+
+    public void setTechnologyIds(Set<Long> technologyIds) {
+        this.technologyIds = technologyIds;
+    }
 }

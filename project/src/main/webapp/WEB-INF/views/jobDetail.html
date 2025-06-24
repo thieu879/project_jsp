@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${position.name}">Chi tiết công việc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+<!--<div th:replace="header :: header"></div>-->
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <!-- Job Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4" th:text="${position.name}">Tên vị trí</h1>
+
+            <!-- Technologies -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <span th:each="tech : ${position.technologies}"
+                      class="px-3 py-1 bg-cyan-100 text-cyan-700 text-sm rounded-full"
+                      th:text="${tech.name}">Technology</span>
+            </div>
+
+            <!-- Job Info Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm">$</span>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-900">Mức lương</div>
+                        <div class="text-sm text-gray-600">
+                            <span th:text="${#numbers.formatDecimal(position.minSalary, 0, 'COMMA', 0, 'POINT')}">1000</span> -
+                            <span th:text="${#numbers.formatDecimal(position.maxSalary, 0, 'COMMA', 0, 'POINT')}">2000</span> USD
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm">⏰</span>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-900">Kinh nghiệm</div>
+                        <div class="text-sm text-gray-600" th:text="${position.minExperience} + ' năm'"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm">📅</span>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-900">Hạn nộp</div>
+                        <div class="text-sm text-gray-600" th:text="${position.expiredDate}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apply Button -->
+            <button id="applyBtn" class="w-full md:w-auto bg-red-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-red-700 transition-colors">
+                Ứng tuyển ngay
+            </button>
+        </div>
+
+        <!-- Job Description -->
+        <div class="border-l-4 border-red-600 pl-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Mô tả công việc</h2>
+            <div class="text-gray-700 whitespace-pre-line" th:text="${position.description}">
+                Mô tả chi tiết về công việc...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Apply -->
+<div id="applyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 pb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Ứng tuyển ngay</h2>
+            <button id="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="px-6 pb-6">
+            <!-- Sửa form để submit đến endpoint đúng -->
+            <form id="applyForm"
+                  th:action="@{'/recruitment-position/' + ${position.id} + '/apply'}"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <!-- File Upload Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                        File CV <span class="text-red-500">*</span>
+                    </label>
+
+                    <!-- Upload Area -->
+                    <div class="border-2 border-dashed border-red-300 rounded-lg bg-red-50 hover:bg-red-100 transition-colors cursor-pointer">
+                        <label class="flex flex-col items-center justify-center py-12 cursor-pointer">
+                            <div class="w-full bg-red-600 text-white py-4 rounded-lg flex items-center justify-center mb-4 mx-4">
+                                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                Chọn file CV
+                            </div>
+                            <input type="file"
+                                   id="cvFile"
+                                   name="cvFile"
+                                   class="hidden"
+                                   required/>
+                            <span id="fileName" class="text-sm text-gray-500"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3 justify-end">
+                    <button type="button" id="cancelBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                        Hủy
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                        Nộp hồ sơ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="footer :: footer"></div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const applyBtn = document.getElementById('applyBtn');
+        const applyModal = document.getElementById('applyModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const cvFile = document.getElementById('cvFile');
+        const fileName = document.getElementById('fileName');
+
+        // Show modal
+        applyBtn.addEventListener('click', function() {
+            applyModal.classList.remove('hidden');
+        });
+
+        // Hide modal
+        function hideModal() {
+            applyModal.classList.add('hidden');
+        }
+
+        closeModal.addEventListener('click', hideModal);
+        cancelBtn.addEventListener('click', hideModal);
+
+        // Click outside modal to close
+        applyModal.addEventListener('click', function(e) {
+            if (e.target === applyModal) {
+                hideModal();
+            }
+        });
+
+        // File upload handler
+        cvFile.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileName.textContent = this.files[0].name;
+            } else {
+                fileName.textContent = '';
+            }
+        });
+
+        // Form validation trước khi submit
+        document.getElementById('applyForm').addEventListener('submit', function(e) {
+            if (cvFile.files.length === 0) {
+                e.preventDefault();
+                alert('Vui lòng chọn file CV');
+                return false;
+            }
+
+            // Hiển thị loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang xử lý...';
+
+            // Form sẽ tự động submit đến endpoint
+        });
+    });
+</script>
+</body>
+</html>

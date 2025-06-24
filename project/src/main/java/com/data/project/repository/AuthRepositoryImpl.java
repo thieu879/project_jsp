@@ -88,5 +88,38 @@ public class AuthRepositoryImpl implements AuthRepository {
         query.setParameter("username", username);
         return query.uniqueResult();
     }
+    @Override
+    public Auth getAuthByEmail(String email) {
+        Session session = sessionFactory.getCurrentSession();
+        String hql = "FROM Auth WHERE email = :email";
+        Query<Auth> query = session.createQuery(hql, Auth.class);
+        query.setParameter("email", email);
+        return query.uniqueResult();
+    }
 
+    @Override
+    public Auth findById(Long id) {
+        Session session = sessionFactory.getCurrentSession();
+        return session.get(Auth.class, id);
+    }
+    @Override
+    public boolean checkPassword(String rawPassword, String encodedPassword) {
+        return BCrypt.checkpw(rawPassword, encodedPassword);
+    }
+
+    @Override
+    public void changePassword(String email, String newPassword) {
+        Session session = sessionFactory.getCurrentSession();
+
+        String hql = "FROM Auth WHERE email = :email";
+        Query<Auth> query = session.createQuery(hql, Auth.class);
+        query.setParameter("email", email);
+        Auth auth = query.uniqueResult();
+
+        if (auth != null) {
+            String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+            auth.setPassword(hashedPassword);
+            session.update(auth);
+        }
+    }
 }

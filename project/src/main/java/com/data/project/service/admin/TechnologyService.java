@@ -13,5 +13,6 @@ public interface TechnologyService {
     List<Technology> searchByName(String name, int page, int size);
     long countAll();
     long countByName(String name);
+    boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, Long id);
 }
-

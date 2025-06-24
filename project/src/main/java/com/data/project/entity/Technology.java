@@ -17,7 +17,7 @@ public class Technology {
     private Set<Candidate> candidates;
 
     @ManyToMany(mappedBy = "technologies")
-    private Set<Recruitment_position> recruitmentPositions;
+    private Set<RecruitmentPosition> recruitmentPositions;
 
     public Technology() {}
 
@@ -58,11 +58,11 @@ public class Technology {
         this.candidates = candidates;
     }
 
-    public Set<Recruitment_position> getRecruitmentPositions() {
+    public Set<RecruitmentPosition> getRecruitmentPositions() {
         return recruitmentPositions;
     }
 
-    public void setRecruitmentPositions(Set<Recruitment_position> recruitmentPositions) {
+    public void setRecruitmentPositions(Set<RecruitmentPosition> recruitmentPositions) {
         this.recruitmentPositions = recruitmentPositions;
     }
 }
